@@ -37,5 +37,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: DeltaCrawler-${{ github.run_number }}
-        path: ./artifacts/DeltaCrawler
+        path: ./artifacts/DeltaCrawler-win-x64
         if-no-files-found: error
