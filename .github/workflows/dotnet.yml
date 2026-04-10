@@ -29,9 +29,9 @@ jobs:
 
     - name: Test
       run: dotnet test --no-build -c Release --verbosity normal
-
-    - name: Publish DeltaCrawler
-      run: dotnet publish ./DeltaCrawler -c Release -o ./artifacts/DeltaCrawler
+    
+    - name: Publish DeltaCrawler (Windows single-file exe)
+      run: dotnet publish ./DeltaCrawler -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./artifacts/DeltaCrawler-win-x64
 
     - name: Upload DeltaCrawler artifact
       uses: actions/upload-artifact@v4
