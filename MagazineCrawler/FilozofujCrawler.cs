@@ -1,13 +1,13 @@
 using HtmlAgilityPack;
 
-internal class DeltaCrawler : IAmCrawler
+internal class FilozofujCrawler : IAmCrawler
 {
-    private const string BaseUrl = "https://deltami.edu.pl";
-    private const string IndexUrl = $"{BaseUrl}/numery/";
-    private const string OutputDir = "delta_pdfs";
+    private const string BaseUrl = "https://filozofuj.eu";
+    private const string IndexUrl = $"{BaseUrl}/wydania/";
+    private const string OutputDir = "filozofuj_pdfs";
     private const int Parallelism = 4;
 
-    public string Name => "Delta";
+    public string Name => "Filozofuj!";
 
     public async Task RunAsync(CancellationToken ct = default)
     {
@@ -24,11 +24,13 @@ internal class DeltaCrawler : IAmCrawler
         indexDoc.LoadHtml(indexHtml);
 
         var issueUrls = indexDoc.DocumentNode
-            .SelectNodes("//a[@href]")
+            .SelectNodes("//h2//a[@href]")
             ?.Select(a => a.GetAttributeValue("href", ""))
-            .Where(href => System.Text.RegularExpressions.Regex.IsMatch(href, @"^https?://deltami\.edu\.pl/\d{4}/\d{1,2}/?$")
-                        || System.Text.RegularExpressions.Regex.IsMatch(href, @"^/\d{4}/\d{1,2}/?$"))
-            .Select(href => href.StartsWith("http") ? href : BaseUrl + href)
+            .Where(href => href.StartsWith(BaseUrl + "/")
+                        && !href.Contains("/category/")
+                        && !href.Contains("/tag/")
+                        && !href.Contains("/produkt/")
+                        && !href.Contains("/kategoria-produktu/"))
             .Distinct()
             .Order()
             .ToList() ?? [];
@@ -50,7 +52,8 @@ internal class DeltaCrawler : IAmCrawler
                 var pdfHref = issueDoc.DocumentNode
                     .SelectNodes("//a[@href]")
                     ?.Select(a => a.GetAttributeValue("href", ""))
-                    .FirstOrDefault(href => href.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase));
+                    .FirstOrDefault(href => href.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)
+                                         && href.Contains("filozofuj.eu/wp-content/"));
 
                 if (pdfHref is null)
                 {
@@ -59,8 +62,7 @@ internal class DeltaCrawler : IAmCrawler
                     return;
                 }
 
-                var pdfUrl = pdfHref.StartsWith("http") ? pdfHref : BaseUrl + pdfHref;
-                var fileName = Path.GetFileName(new Uri(pdfUrl).LocalPath);
+                var fileName = Path.GetFileName(new Uri(pdfHref).LocalPath);
                 var filePath = Path.Combine(OutputDir, fileName);
 
                 if (File.Exists(filePath))
@@ -70,8 +72,8 @@ internal class DeltaCrawler : IAmCrawler
                     return;
                 }
 
-                Console.WriteLine($"[POBIERANIE] {pdfUrl}");
-                var bytes = await WithRetry(() => http.GetByteArrayAsync(pdfUrl, ct), fileName, ct: ct);
+                Console.WriteLine($"[POBIERANIE] {pdfHref}");
+                var bytes = await WithRetry(() => http.GetByteArrayAsync(pdfHref, ct), fileName, ct: ct);
                 await File.WriteAllBytesAsync(filePath, bytes, ct);
                 Console.WriteLine($"[GOTOWE]    {fileName} ({bytes.Length / 1024} KB)");
                 Interlocked.Increment(ref downloaded);
