@@ -4,14 +4,17 @@ internal class FilozofujCrawler : IAmCrawler
 {
     private const string BaseUrl = "https://filozofuj.eu";
     private const string IndexUrl = $"{BaseUrl}/wydania/";
-    private const string OutputDir = "filozofuj_pdfs";
     private const int Parallelism = 4;
+
+    private readonly string _outputDir;
+
+    internal FilozofujCrawler(CrawlerSettings settings) => _outputDir = settings.OutputDir;
 
     public string Name => "Filozofuj!";
 
     public async Task RunAsync(CancellationToken ct = default)
     {
-        Directory.CreateDirectory(OutputDir);
+        Directory.CreateDirectory(_outputDir);
 
         using var http = new HttpClient();
         http.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; MagazineCrawler/1.0)");
@@ -63,7 +66,7 @@ internal class FilozofujCrawler : IAmCrawler
                 }
 
                 var fileName = Path.GetFileName(new Uri(pdfHref).LocalPath);
-                var filePath = Path.Combine(OutputDir, fileName);
+                var filePath = Path.Combine(_outputDir, fileName);
 
                 if (File.Exists(filePath))
                 {
@@ -96,7 +99,7 @@ internal class FilozofujCrawler : IAmCrawler
         await Task.WhenAll(tasks);
 
         Console.WriteLine($"\nGotowe! Pobrano: {downloaded}, Pominięto: {skipped}, Błędy: {errors}");
-        Console.WriteLine($"PDFy zapisano w: {Path.GetFullPath(OutputDir)}");
+        Console.WriteLine($"PDFy zapisano w: {Path.GetFullPath(_outputDir)}");
     }
 
     private static async Task<T> WithRetry<T>(Func<Task<T>> action, string label, int maxRetries = 3, CancellationToken ct = default)

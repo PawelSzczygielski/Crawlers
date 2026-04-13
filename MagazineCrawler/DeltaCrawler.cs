@@ -4,14 +4,17 @@ internal class DeltaCrawler : IAmCrawler
 {
     private const string BaseUrl = "https://deltami.edu.pl";
     private const string IndexUrl = $"{BaseUrl}/numery/";
-    private const string OutputDir = "delta_pdfs";
     private const int Parallelism = 4;
+
+    private readonly string _outputDir;
+
+    internal DeltaCrawler(CrawlerSettings settings) => _outputDir = settings.OutputDir;
 
     public string Name => "Delta";
 
     public async Task RunAsync(CancellationToken ct = default)
     {
-        Directory.CreateDirectory(OutputDir);
+        Directory.CreateDirectory(_outputDir);
 
         using var http = new HttpClient();
         http.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; MagazineCrawler/1.0)");
@@ -61,7 +64,7 @@ internal class DeltaCrawler : IAmCrawler
 
                 var pdfUrl = pdfHref.StartsWith("http") ? pdfHref : BaseUrl + pdfHref;
                 var fileName = Path.GetFileName(new Uri(pdfUrl).LocalPath);
-                var filePath = Path.Combine(OutputDir, fileName);
+                var filePath = Path.Combine(_outputDir, fileName);
 
                 if (File.Exists(filePath))
                 {
@@ -94,7 +97,7 @@ internal class DeltaCrawler : IAmCrawler
         await Task.WhenAll(tasks);
 
         Console.WriteLine($"\nGotowe! Pobrano: {downloaded}, Pominięto: {skipped}, Błędy: {errors}");
-        Console.WriteLine($"PDFy zapisano w: {Path.GetFullPath(OutputDir)}");
+        Console.WriteLine($"PDFy zapisano w: {Path.GetFullPath(_outputDir)}");
     }
 
     private static async Task<T> WithRetry<T>(Func<Task<T>> action, string label, int maxRetries = 3, CancellationToken ct = default)
