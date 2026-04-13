@@ -1,4 +1,4 @@
-﻿IAmCrawler[] crawlers = [new DeltaCrawler(), new FilozofujCrawler()];
+﻿IAmCrawler[] crawlers = [new DeltaCrawler(), new FilozofujCrawler(), new SmokopolitanCrawler()];
 
 string[] options = [..crawlers.Select(c => c.Name), "Nic, kończymy"];
 var choice = ConsoleUi.ShowMenu("Co chcesz pobrać? (użyj strzałek + entera, ctrl+c przerywa pobieranie)", options);
