@@ -18,10 +18,14 @@ IAmCrawler[] crawlers =
 ];
 
 string[] options = [..crawlers.Select(c => c.Name), "Nic, kończymy"];
-var choice = ConsoleUi.ShowMenu("Co chcesz pobrać? (użyj strzałek + entera, ctrl+c przerywa pobieranie)", options);
 
-if (choice < crawlers.Length)
+while (true)
 {
+    var choice = ConsoleUi.ShowMenu("Co chcesz pobrać? (użyj strzałek + entera, ctrl+c przerywa pobieranie)", options);
+
+    if (choice == crawlers.Length)
+        break;
+
     using var cts = new CancellationTokenSource();
     Console.CancelKeyPress += (_, e) =>
     {
@@ -38,4 +42,7 @@ if (choice < crawlers.Length)
     {
         Console.WriteLine("[ANULOWANO] Pobieranie zostało przerwane.");
     }
+
+    Console.WriteLine("\nNaciśnij dowolny klawisz, aby wrócić do menu...");
+    Console.ReadKey(true);
 }
