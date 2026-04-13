@@ -30,12 +30,12 @@ jobs:
     - name: Test
       run: dotnet test --no-build -c Release --verbosity normal
     
-    - name: Publish DeltaCrawler (Windows single-file exe)
-      run: dotnet publish ./DeltaCrawler -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./artifacts/DeltaCrawler-win-x64
+    - name: Publish MagazineCrawler (Windows single-file exe)
+      run: dotnet publish ./MagazineCrawler -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./artifacts/MagazineCrawler-win-x64
 
-    - name: Upload DeltaCrawler artifact
+    - name: Upload MagazineCrawler artifact
       uses: actions/upload-artifact@v4
       with:
-        name: DeltaCrawler-${{ github.run_number }}
-        path: ./artifacts/DeltaCrawler-win-x64
+        name: MagazineCrawler-${{ github.run_number }}
+        path: ./artifacts/Magazinerawler-win-x64
         if-no-files-found: error
