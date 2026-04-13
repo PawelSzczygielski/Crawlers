@@ -37,5 +37,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: MagazineCrawler-${{ github.run_number }}
-        path: ./artifacts/Magazinerawler-win-x64
+        path: ./artifacts/MagazineCrawler-win-x64
         if-no-files-found: error
